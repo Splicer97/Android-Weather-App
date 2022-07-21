@@ -7,6 +7,7 @@ import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.splicer.androidweatherapp.databinding.ActivityMainBinding
+import com.splicer.androidweatherapp.fragments.MainFragment
 import org.json.JSONObject
 
 const val API_KEY = "b0676713ebfe49efbf8174320221907"
@@ -17,9 +18,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        binding.bGet.setOnClickListener {
-            getResult("London")
-        }
+        supportFragmentManager.beginTransaction().replace(R.id.place, MainFragment.newInstance()).commit()
     }
 
     private fun getResult(name: String) {
