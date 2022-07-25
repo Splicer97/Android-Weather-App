@@ -12,7 +12,7 @@ import com.splicer.androidweatherapp.databinding.ListItemBinding
 class WeatherAdapter : ListAdapter<WeatherModel, WeatherAdapter.Holder>(Comparator()) {
 
     class Holder(view: View) : RecyclerView.ViewHolder(view){
-        val binding = ListItemBinding.bind(view)
+        private val binding = ListItemBinding.bind(view)
 
         fun bind(item: WeatherModel) = with(binding){
             tvDate.text = item.time
