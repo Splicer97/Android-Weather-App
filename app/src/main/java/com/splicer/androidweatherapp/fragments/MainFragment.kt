@@ -7,7 +7,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.FragmentActivity
@@ -17,7 +16,6 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.tabs.TabLayoutMediator
 import com.splicer.androidweatherapp.MainViewModel
-import com.splicer.androidweatherapp.R
 import com.splicer.androidweatherapp.adapters.VpAdapter
 import com.splicer.androidweatherapp.adapters.WeatherModel
 import com.splicer.androidweatherapp.databinding.FragmentMainBinding
@@ -58,12 +56,12 @@ class MainFragment : Fragment() {
 
     private fun updateCurrentCard() = with(binding) {
         model.liveDataCurrent.observe(viewLifecycleOwner) {
-            val maxMinTemp = "${it.maxTemp}C / ${it.minTemp}"
+            val maxMinTemp = "${it.maxTemp}C / ${it.minTemp}C"
             tvCity.text = it.city
             tvData.text = it.time
-            tvCurrentTemp.text = it.currentTemp
+            tvCurrentTemp.text = it.currentTemp.ifEmpty { maxMinTemp }
             tvCondition.text = it.condition
-            tvMaxMin.text = maxMinTemp
+            tvMaxMin.text = if(it.currentTemp.isEmpty()) "" else maxMinTemp
 
             Picasso.get().load("https:" + it.imageUrl).into(imWeather)
 
@@ -140,8 +138,8 @@ class MainFragment : Fragment() {
                 day.getJSONObject("day").getJSONObject("condition")
                     .getString("text"),
                 "",
-                day.getJSONObject("day").getString("maxtemp_c"),
-                day.getJSONObject("day").getString("mintemp_c"),
+                day.getJSONObject("day").getString("maxtemp_c").toFloat().toInt().toString(),
+                day.getJSONObject("day").getString("mintemp_c").toFloat().toInt().toString(),
                 day.getJSONObject("day").getJSONObject("condition")
                     .getString("icon"),
                 day.getJSONArray("hour").toString()
