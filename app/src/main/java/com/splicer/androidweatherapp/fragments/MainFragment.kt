@@ -14,6 +14,11 @@ import androidx.fragment.app.activityViewModels
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.material.tabs.TabLayoutMediator
 import com.splicer.androidweatherapp.MainViewModel
 import com.splicer.androidweatherapp.adapters.VpAdapter
@@ -25,6 +30,7 @@ import org.json.JSONObject
 const val API_KEY = "b0676713ebfe49efbf8174320221907"
 
 class MainFragment : Fragment() {
+    private lateinit var fLocationClient: FusedLocationProviderClient
     private val fList = listOf(HoursFragment.newInstance(), DaysFragment.newInstance())
     private val tList = listOf("Hours", "Days")
     private lateinit var pLauncher: ActivityResultLauncher<String>
@@ -43,15 +49,28 @@ class MainFragment : Fragment() {
         checkPermission()
         init()
         updateCurrentCard()
-        requestWeatherData("London")
+        getLocation()
+    }
+
+    private fun getLocation() {
+        val ct = CancellationTokenSource()
+        fLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, ct.token)
+            .addOnCompleteListener {
+                requestWeatherData("${it.result.latitude}, ${it.result.longitude}")
+            }
     }
 
     private fun init() = with(binding) {
+        fLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
         val adapter = VpAdapter(activity as FragmentActivity, fList)
         vp.adapter = adapter
         TabLayoutMediator(tabLayout, vp) { tab, pos ->
             tab.text = tList[pos]
         }.attach()
+        ibSync.setOnClickListener {
+            tabLayout.selectTab(tabLayout.getTabAt(0))
+            getLocation()
+        }
     }
 
     private fun updateCurrentCard() = with(binding) {
@@ -61,7 +80,7 @@ class MainFragment : Fragment() {
             tvData.text = it.time
             tvCurrentTemp.text = it.currentTemp.ifEmpty { maxMinTemp }
             tvCondition.text = it.condition
-            tvMaxMin.text = if(it.currentTemp.isEmpty()) "" else maxMinTemp
+            tvMaxMin.text = if (it.currentTemp.isEmpty()) "" else maxMinTemp
 
             Picasso.get().load("https:" + it.imageUrl).into(imWeather)
 
