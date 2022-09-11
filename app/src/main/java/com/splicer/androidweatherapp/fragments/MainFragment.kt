@@ -1,6 +1,7 @@
 package com.splicer.androidweatherapp.fragments
 
 import android.Manifest
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.location.LocationManager
@@ -61,12 +62,13 @@ class MainFragment : Fragment() {
         super.onResume()
         checkLocation()
     }
+
     private fun checkLocation() {
         if (isLocationEnabled()) {
             getLocation()
         } else {
             DialogManager.locationSettngsDialog(requireContext(), object : DialogManager.Listener {
-                override fun onClick() {
+                override fun onClick(name: String?) {
                     startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
                 }
             })
@@ -96,6 +98,15 @@ class MainFragment : Fragment() {
         ibSync.setOnClickListener {
             tabLayout.selectTab(tabLayout.getTabAt(0))
             checkLocation()
+        }
+        ibSearch.setOnClickListener {
+            DialogManager.searchByNameDialog(requireContext(), object : DialogManager.Listener {
+                override fun onClick(name: String?) {
+                    if (name != null) {
+                        requestWeatherData(name)
+                    }
+                }
+            })
         }
     }
 
